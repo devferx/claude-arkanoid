@@ -13,6 +13,44 @@ function playSound(audio) {
 }
 
 const BRICK_COLORS = ['red', 'cyan', 'green', 'magenta', 'yellow', 'hotpink', 'gray'];
+
+// 3 levels — each is a 7×11 2D array of color strings or null (gap)
+const LEVELS = [
+  // Level 1 — full grid, horizontal color stripes (identical to original layout)
+  [
+    ['red',     'red',     'red',     'red',     'red',     'red',     'red',     'red',     'red',     'red',     'red'    ],
+    ['cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan'   ],
+    ['green',   'green',   'green',   'green',   'green',   'green',   'green',   'green',   'green',   'green',   'green'  ],
+    ['magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta'],
+    ['yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow' ],
+    ['hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink'],
+    ['gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray'   ],
+  ],
+  // Level 2 — checkerboard gaps (~35 bricks)
+  [
+    ['red',     null,      'red',     null,      'red',     null,      'red',     null,      'red',     null,      'red'    ],
+    [null,      'cyan',    null,      'cyan',    null,      'cyan',    null,      'cyan',    null,      'cyan',    null     ],
+    ['green',   null,      'green',   null,      'green',   null,      'green',   null,      'green',   null,      'green'  ],
+    [null,      'magenta', null,      'magenta', null,      'magenta', null,      'magenta', null,      'magenta', null     ],
+    ['yellow',  null,      'yellow',  null,      'yellow',  null,      'yellow',  null,      'yellow',  null,      'yellow' ],
+    [null,      'hotpink', null,      'hotpink', null,      'hotpink', null,      'hotpink', null,      'hotpink', null     ],
+    ['gray',    null,      'gray',    null,      'gray',    null,      'gray',    null,      'gray',    null,      'gray'   ],
+  ],
+  // Level 3 — full grid, diagonal color rotation (77 bricks, complex pattern)
+  [
+    ['red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta'],
+    ['cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow' ],
+    ['green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink'],
+    ['magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray'   ],
+    ['yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red'    ],
+    ['hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan'   ],
+    ['gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green'  ],
+  ],
+];
+
+const BASE_SPEED      = { vx: 3, vy: -4 };
+const SPEED_INCREMENT = 0.5;
+
 const BRICK_COLS   = 11;
 const BRICK_ROWS   = 7;
 const BRICK_W      = 64;
@@ -24,36 +62,44 @@ let state = { phase: 'start' };
 const keys = {};
 let prevTimestamp = 0;
 
-function initState() {
+function resetRound() {
   const paddleW = 162;
   const paddleH = 14;
   const ballW   = 16;
   const ballH   = 16;
   const paddleY = H - 50;
 
+  const layout = LEVELS[state.level - 1];
   const bricks = [];
   for (let row = 0; row < BRICK_ROWS; row++) {
     for (let col = 0; col < BRICK_COLS; col++) {
+      const color = layout[row][col];
+      if (color === null) continue;
       bricks.push({
         x:         BRICK_START_X + col * BRICK_W,
         y:         BRICK_START_Y + row * BRICK_H,
         w:         BRICK_W,
         h:         BRICK_H,
-        color:     BRICK_COLORS[row],
+        color,
         alive:     true,
         explosion: null,
       });
     }
   }
 
-  state = {
-    phase:  'playing',
-    score:  0,
-    lives:  3,
-    paddle: { x: (W - paddleW) / 2, y: paddleY, w: paddleW, h: paddleH },
-    ball:   { x: W / 2 - ballW / 2, y: paddleY - ballH - 4, vx: 3, vy: -4, w: ballW, h: ballH },
-    bricks,
-  };
+  const baseSpeed = Math.hypot(BASE_SPEED.vx, BASE_SPEED.vy);
+  const speed     = baseSpeed + (state.level - 1) * SPEED_INCREMENT;
+  const ballVx    = (BASE_SPEED.vx / baseSpeed) * speed;
+  const ballVy    = (BASE_SPEED.vy / baseSpeed) * speed;
+
+  state.paddle = { x: (W - paddleW) / 2, y: paddleY, w: paddleW, h: paddleH };
+  state.ball   = { x: W / 2 - ballW / 2, y: paddleY - ballH - 4, vx: ballVx, vy: ballVy, w: ballW, h: ballH };
+  state.bricks = bricks;
+}
+
+function initState() {
+  state = { phase: 'playing', score: 0, lives: 3, level: 1 };
+  resetRound();
 }
 
 // ── Drawing ──────────────────────────────────────────────────────────────────
@@ -78,8 +124,12 @@ function drawHUD() {
   ctx.font         = '18px monospace';
   ctx.textBaseline = 'top';
   ctx.fillStyle    = '#fff';
-  ctx.textAlign    = 'left';
+
+  ctx.textAlign = 'left';
   ctx.fillText('Score: ' + state.score, 10, 10);
+
+  ctx.textAlign = 'center';
+  ctx.fillText('LVL ' + state.level, W / 2, 10);
 
   const ballSize = 16;
   const gap = 6;
@@ -127,6 +177,22 @@ function drawEndScreen(title) {
   ctx.font      = '20px monospace';
   ctx.fillStyle = '#aaa';
   ctx.fillText('Press any key or click to restart', W / 2, H / 2 + 60);
+}
+
+function drawLevelComplete() {
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+
+  ctx.fillStyle = '#fff';
+  ctx.font      = 'bold 64px monospace';
+  ctx.fillText('Level ' + state.level, W / 2, H / 2 - 60);
+
+  ctx.fillStyle = '#aaa';
+  ctx.font      = '24px monospace';
+  ctx.fillText('Press any key or click to continue', W / 2, H / 2 + 20);
 }
 
 // ── Physics ───────────────────────────────────────────────────────────────────
@@ -183,7 +249,12 @@ function update(dt) {
     }
 
     if (state.bricks.every(bk => !bk.alive)) {
-      state.phase = 'win';
+      if (state.level < LEVELS.length) {
+        state.level++;
+        state.phase = 'level_complete';
+      } else {
+        state.phase = 'win';
+      }
       return;
     }
     break; // one brick per frame
@@ -245,6 +316,8 @@ function loop(ts) {
   } else if (state.phase === 'playing') {
     update(dt);
     drawGame();
+  } else if (state.phase === 'level_complete') {
+    drawLevelComplete();
   } else if (state.phase === 'gameover') {
     drawEndScreen('Game Over');
   } else if (state.phase === 'win') {
@@ -266,9 +339,16 @@ function onRestart() {
   state.phase = 'start';
 }
 
+function onLevelAdvance() {
+  if (state.phase !== 'level_complete') return;
+  resetRound();
+  state.phase = 'playing';
+}
+
 function onKeyDown(e) {
   keys[e.key] = true;
   onRestart();
+  onLevelAdvance();
   onStart();
 }
 
@@ -285,7 +365,7 @@ function onMouseMove(e) {
 
 document.addEventListener('keydown', onKeyDown);
 document.addEventListener('keyup', onKeyUp);
-canvas.addEventListener('click', () => { onRestart(); onStart(); });
+canvas.addEventListener('click', () => { onRestart(); onLevelAdvance(); onStart(); });
 canvas.addEventListener('mousemove', onMouseMove);
 
 loadSpritesheet(() => {
