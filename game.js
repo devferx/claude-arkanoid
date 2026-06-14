@@ -13,6 +13,7 @@ const BRICK_START_X = (W - BRICK_COLS * BRICK_W) / 2;  // 48px margin each side
 const BRICK_START_Y = 60;
 
 let state = { phase: 'start' };
+const keys = {};
 
 function initState() {
   const paddleW = 162;
@@ -116,8 +117,15 @@ function drawEndScreen(title) {
 
 // ── Physics ───────────────────────────────────────────────────────────────────
 
+const PADDLE_SPEED = 7;
+
 function update() {
   const b = state.ball;
+
+  // Paddle keyboard movement
+  const p = state.paddle;
+  if (keys['ArrowLeft'])  p.x = Math.max(0, p.x - PADDLE_SPEED);
+  if (keys['ArrowRight']) p.x = Math.min(W - p.w, p.x + PADDLE_SPEED);
 
   b.x += b.vx;
   b.y += b.vy;
@@ -169,7 +177,6 @@ function update() {
       state.phase = 'gameover';
       return;
     }
-    const p = state.paddle;
     b.x  = W / 2 - b.w / 2;
     b.y  = p.y - b.h - 4;
     b.vx = 3;
@@ -177,7 +184,6 @@ function update() {
   }
 
   // Paddle collision
-  const p = state.paddle;
   if (
     b.vy > 0 &&
     b.y + b.h >= p.y &&
@@ -224,12 +230,13 @@ function onRestart() {
 }
 
 function onKeyDown(e) {
+  keys[e.key] = true;
   onRestart();
   onStart();
-  if (state.phase !== 'playing') return;
-  const p = state.paddle;
-  if (e.key === 'ArrowLeft')  p.x = Math.max(0, p.x - 20);
-  if (e.key === 'ArrowRight') p.x = Math.min(W - p.w, p.x + 20);
+}
+
+function onKeyUp(e) {
+  keys[e.key] = false;
 }
 
 function onMouseMove(e) {
@@ -240,6 +247,7 @@ function onMouseMove(e) {
 }
 
 document.addEventListener('keydown', onKeyDown);
+document.addEventListener('keyup', onKeyUp);
 canvas.addEventListener('click', () => { onRestart(); onStart(); });
 canvas.addEventListener('mousemove', onMouseMove);
 
