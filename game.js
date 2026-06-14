@@ -14,6 +14,7 @@ const BRICK_START_Y = 60;
 
 let state = { phase: 'start' };
 const keys = {};
+let prevTimestamp = 0;
 
 function initState() {
   const paddleW = 162;
@@ -26,12 +27,13 @@ function initState() {
   for (let row = 0; row < BRICK_ROWS; row++) {
     for (let col = 0; col < BRICK_COLS; col++) {
       bricks.push({
-        x:     BRICK_START_X + col * BRICK_W,
-        y:     BRICK_START_Y + row * BRICK_H,
-        w:     BRICK_W,
-        h:     BRICK_H,
-        color: BRICK_COLORS[row],
-        alive: true,
+        x:         BRICK_START_X + col * BRICK_W,
+        y:         BRICK_START_Y + row * BRICK_H,
+        w:         BRICK_W,
+        h:         BRICK_H,
+        color:     BRICK_COLORS[row],
+        alive:     true,
+        explosion: null,
       });
     }
   }
@@ -84,7 +86,11 @@ function drawGame() {
   ctx.fillRect(0, 0, W, H);
 
   for (const b of state.bricks) {
-    if (b.alive) drawSprite(ctx, 'block_' + b.color, b.x, b.y, b.w, b.h);
+    if (b.alive) {
+      drawSprite(ctx, 'block_' + b.color, b.x, b.y, b.w, b.h);
+    } else if (b.explosion !== null) {
+      drawFrame(ctx, EXPLOSION_FRAMES[b.color][b.explosion.frameIndex], b.x, b.y, b.w, b.h);
+    }
   }
 
   drawSprite(ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h);
@@ -119,7 +125,7 @@ function drawEndScreen(title) {
 
 const PADDLE_SPEED = 7;
 
-function update() {
+function update(dt) {
   const b = state.ball;
 
   // Paddle keyboard movement
@@ -155,6 +161,7 @@ function update() {
     if (overlapX <= 0 || overlapY <= 0) continue;
 
     brick.alive = false;
+    brick.explosion = { frameIndex: 0, elapsed: 0 };
     state.score += 10;
 
     if (overlapX < overlapY) {
@@ -198,15 +205,32 @@ function update() {
     b.vx = ratio * speed;
     b.vy = -Math.sqrt(Math.max(speed * speed - b.vx * b.vx, 1));
   }
+
+  // Advance explosion timers
+  for (const brick of state.bricks) {
+    if (brick.explosion === null) continue;
+    brick.explosion.elapsed += dt;
+    if (brick.explosion.elapsed >= EXPLOSION_DURATION) {
+      brick.explosion = null;
+    } else {
+      brick.explosion.frameIndex = Math.min(
+        Math.floor((brick.explosion.elapsed / EXPLOSION_DURATION) * 4),
+        3
+      );
+    }
+  }
 }
 
 // ── Game loop ─────────────────────────────────────────────────────────────────
 
-function loop() {
+function loop(ts) {
+  const dt = Math.min(ts - prevTimestamp, 100);
+  prevTimestamp = ts;
+
   if (state.phase === 'start') {
     drawStartScreen();
   } else if (state.phase === 'playing') {
-    update();
+    update(dt);
     drawGame();
   } else if (state.phase === 'gameover') {
     drawEndScreen('Game Over');
