@@ -201,6 +201,20 @@ function update(dt) {
     b.vx = ratio * speed;
     b.vy = -Math.sqrt(Math.max(speed * speed - b.vx * b.vx, 1));
   }
+
+  // Advance explosion timers
+  for (const brick of state.bricks) {
+    if (brick.explosion === null) continue;
+    brick.explosion.elapsed += dt;
+    if (brick.explosion.elapsed >= EXPLOSION_DURATION) {
+      brick.explosion = null;
+    } else {
+      brick.explosion.frameIndex = Math.min(
+        Math.floor((brick.explosion.elapsed / EXPLOSION_DURATION) * 4),
+        3
+      );
+    }
+  }
 }
 
 // ── Game loop ─────────────────────────────────────────────────────────────────
