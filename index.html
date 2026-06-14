@@ -7,7 +7,68 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <div id="cabinet">
+
+    <!-- Marquee -->
+    <div id="marquee">
+      <div id="marquee-panel">
+        <div id="marquee-title">ARKANOID</div>
+        <div id="marquee-sub">&#9733; &nbsp; TAITO CORPORATION &nbsp; &#9733;</div>
+      </div>
+    </div>
+
+    <div class="h-bar"></div>
+
+    <!-- Body: side panels + screen -->
+    <div id="cabinet-body">
+
+      <div class="side-panel" id="panel-left">
+        <div class="stripe-art"></div>
+        <div class="speaker-grille"></div>
+        <div class="stripe-art"></div>
+      </div>
+
+      <div id="screen-zone">
+        <div id="arcade-bezel">
+          <div class="bezel-corner tl"></div>
+          <div class="bezel-corner tr"></div>
+          <div class="bezel-corner bl"></div>
+          <div class="bezel-corner br"></div>
+          <div id="screen-wrap">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div id="scanlines"></div>
+            <div id="vignette"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-panel" id="panel-right">
+        <div class="stripe-art"></div>
+        <div class="speaker-grille"></div>
+        <div class="stripe-art"></div>
+      </div>
+
+    </div>
+
+    <div class="h-bar"></div>
+
+    <!-- Control panel -->
+    <div id="control-panel">
+      <div class="cp-slot">
+        <div class="coin-slot"></div>
+        <div class="cp-label">INSERT COIN</div>
+      </div>
+      <div class="cp-buttons">
+        <div class="arcade-btn red"></div>
+        <div class="arcade-btn blue"></div>
+      </div>
+      <div class="cp-slot">
+        <div class="coin-slot"></div>
+        <div class="cp-label">INSERT COIN</div>
+      </div>
+    </div>
+
+  </div>
   <script src="assets/spritesheet.js"></script>
   <script src="game.js"></script>
 </body>
