@@ -129,6 +129,11 @@ function update() {
     } else {
       b.vy = -b.vy;
     }
+
+    if (state.bricks.every(bk => !bk.alive)) {
+      state.phase = 'win';
+      return;
+    }
     break; // one brick per frame
   }
 
