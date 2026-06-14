@@ -132,6 +132,20 @@ function update() {
     break; // one brick per frame
   }
 
+  // Ball lost
+  if (b.y > H) {
+    state.lives -= 1;
+    if (state.lives === 0) {
+      state.phase = 'gameover';
+      return;
+    }
+    const p = state.paddle;
+    b.x  = W / 2 - b.w / 2;
+    b.y  = p.y - b.h - 4;
+    b.vx = 3;
+    b.vy = -4;
+  }
+
   // Paddle collision
   const p = state.paddle;
   if (
