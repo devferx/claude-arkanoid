@@ -89,6 +89,28 @@ function drawGame() {
   drawHUD();
 }
 
+// ── End screens ──────────────────────────────────────────────────────────────
+
+function drawEndScreen(title) {
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+
+  ctx.fillStyle = '#fff';
+  ctx.font      = 'bold 64px monospace';
+  ctx.fillText(title, W / 2, H / 2 - 60);
+
+  ctx.font      = '28px monospace';
+  ctx.fillStyle = '#ff0';
+  ctx.fillText('Score: ' + state.score, W / 2, H / 2 + 10);
+
+  ctx.font      = '20px monospace';
+  ctx.fillStyle = '#aaa';
+  ctx.fillText('Press any key or click to restart', W / 2, H / 2 + 60);
+}
+
 // ── Physics ───────────────────────────────────────────────────────────────────
 
 function update() {
@@ -177,6 +199,10 @@ function loop() {
   } else if (state.phase === 'playing') {
     update();
     drawGame();
+  } else if (state.phase === 'gameover') {
+    drawEndScreen('Game Over');
+  } else if (state.phase === 'win') {
+    drawEndScreen('You Win!');
   }
   requestAnimationFrame(loop);
 }
@@ -188,7 +214,14 @@ function onStart() {
   initState();
 }
 
+function onRestart() {
+  if (state.phase !== 'gameover' && state.phase !== 'win') return;
+  initState();
+  state.phase = 'start';
+}
+
 function onKeyDown(e) {
+  onRestart();
   onStart();
   if (state.phase !== 'playing') return;
   const p = state.paddle;
@@ -204,7 +237,7 @@ function onMouseMove(e) {
 }
 
 document.addEventListener('keydown', onKeyDown);
-canvas.addEventListener('click', onStart);
+canvas.addEventListener('click', () => { onRestart(); onStart(); });
 canvas.addEventListener('mousemove', onMouseMove);
 
 loadSpritesheet(() => {
