@@ -14,6 +14,7 @@ const BRICK_START_Y = 60;
 
 let state = { phase: 'start' };
 const keys = {};
+let prevTimestamp = 0;
 
 function initState() {
   const paddleW = 162;
@@ -26,12 +27,13 @@ function initState() {
   for (let row = 0; row < BRICK_ROWS; row++) {
     for (let col = 0; col < BRICK_COLS; col++) {
       bricks.push({
-        x:     BRICK_START_X + col * BRICK_W,
-        y:     BRICK_START_Y + row * BRICK_H,
-        w:     BRICK_W,
-        h:     BRICK_H,
-        color: BRICK_COLORS[row],
-        alive: true,
+        x:         BRICK_START_X + col * BRICK_W,
+        y:         BRICK_START_Y + row * BRICK_H,
+        w:         BRICK_W,
+        h:         BRICK_H,
+        color:     BRICK_COLORS[row],
+        alive:     true,
+        explosion: null,
       });
     }
   }
@@ -119,7 +121,7 @@ function drawEndScreen(title) {
 
 const PADDLE_SPEED = 7;
 
-function update() {
+function update(dt) {
   const b = state.ball;
 
   // Paddle keyboard movement
@@ -155,6 +157,7 @@ function update() {
     if (overlapX <= 0 || overlapY <= 0) continue;
 
     brick.alive = false;
+    brick.explosion = { frameIndex: 0, elapsed: 0 };
     state.score += 10;
 
     if (overlapX < overlapY) {
@@ -202,11 +205,14 @@ function update() {
 
 // ── Game loop ─────────────────────────────────────────────────────────────────
 
-function loop() {
+function loop(ts) {
+  const dt = Math.min(ts - prevTimestamp, 100);
+  prevTimestamp = ts;
+
   if (state.phase === 'start') {
     drawStartScreen();
   } else if (state.phase === 'playing') {
-    update();
+    update(dt);
     drawGame();
   } else if (state.phase === 'gameover') {
     drawEndScreen('Game Over');
