@@ -64,15 +64,18 @@ function drawStartScreen() {
 }
 
 function drawHUD() {
-  ctx.font          = '18px monospace';
-  ctx.textBaseline  = 'top';
-  ctx.fillStyle     = '#fff';
-
-  ctx.textAlign = 'left';
+  ctx.font         = '18px monospace';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle    = '#fff';
+  ctx.textAlign    = 'left';
   ctx.fillText('Score: ' + state.score, 10, 10);
 
-  ctx.textAlign = 'right';
-  ctx.fillText('Lives: ' + state.lives, W - 10, 10);
+  const ballSize = 16;
+  const gap = 6;
+  for (let i = 0; i < state.lives; i++) {
+    const x = W - 10 - (i + 1) * ballSize - i * gap;
+    drawSprite(ctx, 'ball', x, 6, ballSize, ballSize);
+  }
 }
 
 function drawGame() {
