@@ -112,6 +112,26 @@ function update() {
     b.vy = -b.vy;
   }
 
+  // Brick collisions
+  for (const brick of state.bricks) {
+    if (!brick.alive) continue;
+
+    const overlapX = Math.min(b.x + b.w, brick.x + brick.w) - Math.max(b.x, brick.x);
+    const overlapY = Math.min(b.y + b.h, brick.y + brick.h) - Math.max(b.y, brick.y);
+
+    if (overlapX <= 0 || overlapY <= 0) continue;
+
+    brick.alive = false;
+    state.score += 10;
+
+    if (overlapX < overlapY) {
+      b.vx = -b.vx;
+    } else {
+      b.vy = -b.vy;
+    }
+    break; // one brick per frame
+  }
+
   // Paddle collision
   const p = state.paddle;
   if (
