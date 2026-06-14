@@ -86,7 +86,11 @@ function drawGame() {
   ctx.fillRect(0, 0, W, H);
 
   for (const b of state.bricks) {
-    if (b.alive) drawSprite(ctx, 'block_' + b.color, b.x, b.y, b.w, b.h);
+    if (b.alive) {
+      drawSprite(ctx, 'block_' + b.color, b.x, b.y, b.w, b.h);
+    } else if (b.explosion !== null) {
+      drawFrame(ctx, EXPLOSION_FRAMES[b.color][b.explosion.frameIndex], b.x, b.y, b.w, b.h);
+    }
   }
 
   drawSprite(ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h);
