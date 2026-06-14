@@ -4,6 +4,14 @@ const ctx = canvas.getContext('2d');
 const W = canvas.width;
 const H = canvas.height;
 
+const sfxBounce = new Audio('assets/sounds/ball-bounce.mp3');
+const sfxBreak  = new Audio('assets/sounds/break-sound.mp3');
+
+function playSound(audio) {
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
+
 const BRICK_COLORS = ['red', 'cyan', 'green', 'magenta', 'yellow', 'hotpink', 'gray'];
 const BRICK_COLS   = 11;
 const BRICK_ROWS   = 7;
@@ -140,15 +148,18 @@ function update(dt) {
   if (b.x <= 0) {
     b.x  = 0;
     b.vx = -b.vx;
+    playSound(sfxBounce);
   } else if (b.x + b.w >= W) {
     b.x  = W - b.w;
     b.vx = -b.vx;
+    playSound(sfxBounce);
   }
 
   // Ceiling
   if (b.y <= 0) {
     b.y  = 0;
     b.vy = -b.vy;
+    playSound(sfxBounce);
   }
 
   // Brick collisions
@@ -163,6 +174,7 @@ function update(dt) {
     brick.alive = false;
     brick.explosion = { frameIndex: 0, elapsed: 0 };
     state.score += 10;
+    playSound(sfxBreak);
 
     if (overlapX < overlapY) {
       b.vx = -b.vx;
@@ -204,6 +216,7 @@ function update(dt) {
     const ratio  = offset / (p.w / 2);           // [-1, 1]
     b.vx = ratio * speed;
     b.vy = -Math.sqrt(Math.max(speed * speed - b.vx * b.vx, 1));
+    playSound(sfxBounce);
   }
 
   // Advance explosion timers
