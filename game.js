@@ -13,6 +13,41 @@ function playSound(audio) {
 }
 
 const BRICK_COLORS = ['red', 'cyan', 'green', 'magenta', 'yellow', 'hotpink', 'gray'];
+
+// 3 levels — each is a 7×11 2D array of color strings or null (gap)
+const LEVELS = [
+  // Level 1 — full grid, horizontal color stripes (identical to original layout)
+  [
+    ['red',     'red',     'red',     'red',     'red',     'red',     'red',     'red',     'red',     'red',     'red'    ],
+    ['cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan',    'cyan'   ],
+    ['green',   'green',   'green',   'green',   'green',   'green',   'green',   'green',   'green',   'green',   'green'  ],
+    ['magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta', 'magenta'],
+    ['yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow',  'yellow' ],
+    ['hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink', 'hotpink'],
+    ['gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray',    'gray'   ],
+  ],
+  // Level 2 — checkerboard gaps (~35 bricks)
+  [
+    ['red',     null,      'red',     null,      'red',     null,      'red',     null,      'red',     null,      'red'    ],
+    [null,      'cyan',    null,      'cyan',    null,      'cyan',    null,      'cyan',    null,      'cyan',    null     ],
+    ['green',   null,      'green',   null,      'green',   null,      'green',   null,      'green',   null,      'green'  ],
+    [null,      'magenta', null,      'magenta', null,      'magenta', null,      'magenta', null,      'magenta', null     ],
+    ['yellow',  null,      'yellow',  null,      'yellow',  null,      'yellow',  null,      'yellow',  null,      'yellow' ],
+    [null,      'hotpink', null,      'hotpink', null,      'hotpink', null,      'hotpink', null,      'hotpink', null     ],
+    ['gray',    null,      'gray',    null,      'gray',    null,      'gray',    null,      'gray',    null,      'gray'   ],
+  ],
+  // Level 3 — full grid, diagonal color rotation (77 bricks, complex pattern)
+  [
+    ['red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta'],
+    ['cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow' ],
+    ['green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink'],
+    ['magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray'   ],
+    ['yellow',  'hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red'    ],
+    ['hotpink', 'gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan'   ],
+    ['gray',    'red',     'cyan',    'green',   'magenta', 'yellow',  'hotpink', 'gray',    'red',     'cyan',    'green'  ],
+  ],
+];
+
 const BRICK_COLS   = 11;
 const BRICK_ROWS   = 7;
 const BRICK_W      = 64;
