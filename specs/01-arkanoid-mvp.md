@@ -1,6 +1,6 @@
 # SPEC 01 — Arkanoid MVP
 
-> **Status:** Draft · **Depends on:** — · **Date:** 2026-06-14
+> **Status:** Implemented · **Depends on:** — · **Date:** 2026-06-14
 > **Objective:** Implement a playable Arkanoid game with start screen, game loop, and end screens, served as a static `index.html` using only HTML, CSS, and JS.
 
 ---
